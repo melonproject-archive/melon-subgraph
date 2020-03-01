@@ -26,7 +26,7 @@ export function nameToSlug(name: string): string {
     }
 
     //  prevent multiple subsequent dashes
-    if (i > 0 && char == "-" && slug.charAt(i - 1) == "-") {
+    if (i > 0 && char == "-" && slug.charAt(slug.length - 1) == "-") {
       char = "";
     }
 
