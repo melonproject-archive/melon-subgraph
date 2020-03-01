@@ -3,15 +3,16 @@ export function nameToSlug(name: string): string {
   for (let i = 0; i < name.length; i += 1) {
     let code = name.charCodeAt(i);
 
+    let char = "";
     if (code >= 48 && code <= 57) {
       // numbers
-      slug += String.fromCharCode(code);
+      char = String.fromCharCode(code);
     } else if (code >= 97 && code <= 122) {
       // lower case characters
-      slug += String.fromCharCode(code);
+      char = String.fromCharCode(code);
     } else if (code >= 65 && code <= 90) {
       // convert upper case characters to lower case
-      slug += String.fromCharCode(code + 32);
+      char = String.fromCharCode(code + 32);
     } else if (
       code == 32 ||
       code == 42 ||
@@ -21,8 +22,19 @@ export function nameToSlug(name: string): string {
       code == 95
     ) {
       // space, period, *, underscore, dash to dash
-      slug += "-";
+      char = "-";
     }
+
+    //  prevent multiple subsequent dashes
+    if (i > 0 && char == "-" && slug.charAt(i - 1) == "-") {
+      char = "";
+    }
+
+    //prevent dash at the end
+    if (i == name.length - 1 && char == "-") {
+      char = "";
+    }
+    slug += char;
   }
 
   return slug;
