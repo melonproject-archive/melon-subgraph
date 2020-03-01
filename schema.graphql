@@ -189,6 +189,7 @@ type ExchangeAdapter @entity {
 type Fund @entity {
   id: ID!
   name: String
+  slug: String
   manager: FundManager
   createdAt: BigInt
   isShutdown: Boolean

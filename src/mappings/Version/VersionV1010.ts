@@ -24,6 +24,7 @@ import {
 import { SharesContract } from "../../codegen/templates/VersionDataSourceV1010/SharesContract";
 import { saveEvent } from "../../utils/saveEvent";
 import { emptyCalcsObject } from "../../utils/emptyCalcsObject";
+import { nameToSlug } from "../../utils/nameToSlug";
 
 export function handleNewFund(event: NewFund): void {
   // ignore contracts created before go-live
@@ -51,9 +52,12 @@ export function handleNewFund(event: NewFund): void {
 
   let state = currentState();
 
+  let name = hexToAscii(contract.name());
+
   let fund = new Fund(hub);
   fund.manager = manager.id;
-  fund.name = hexToAscii(contract.name());
+  fund.name = name;
+  fund.slug = nameToSlug(name);
   fund.createdAt = contract.creationTime();
   fund.isShutdown = contract.isShutDown();
   fund.accounting = addresses[0];
