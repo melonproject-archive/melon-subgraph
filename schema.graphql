@@ -44,6 +44,7 @@ type Version @entity {
   id: ID!
   registry: Registry!
   name: String
+  timestamp: BigInt!
   funds: [Fund!]!
 }
 
@@ -189,7 +190,7 @@ type ExchangeAdapter @entity {
 type Fund @entity {
   id: ID!
   name: String
-  slug: String
+  slug: FundSlug @derivedFrom(field: "fund")
   manager: FundManager
   createdAt: BigInt
   isShutdown: Boolean
@@ -222,6 +223,18 @@ type Fund @entity {
   holdingsHistory: [FundHoldingsHistory!]! @derivedFrom(field: "fund")
   lastCalculationsUpdate: BigInt
   # events: [EventHistory!]! @derivedFrom(field: "fund")
+}
+
+interface Slug {
+  id: ID!
+}
+
+type FundSlug implements Slug @entity {
+  id: ID!
+  fund: Fund!
+  manager: FundManager!
+  version: Version!
+  successor: FundSlug
 }
 
 type FundManager @entity {
