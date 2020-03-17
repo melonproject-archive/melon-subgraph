@@ -510,6 +510,8 @@ type Trade @entity {
   amountSold: BigInt
   amountBought: BigInt
   timestamp: BigInt!
+  gasUsed: BigInt
+  gasPrice: BigInt
 }
 
 type Event @entity {

@@ -152,25 +152,40 @@ export function handleExchangeMethodCall(event: ExchangeMethodCall): void {
     fundHoldingsHistory.assetGav = assetGav;
     fundHoldingsHistory.save();
 
-    if (!holdingAmount.isZero()) {
-      let fundHolding = new FundHolding(fund.id + "/" + holdingAddress.toHex());
-      fundHolding.fund = fund.id;
-      fundHolding.asset = holdingAddress.toHex();
-      fundHolding.amount = holdingAmount;
-      fundHolding.assetGav = assetGav;
-      fundHolding.validPrice = fundHoldingsHistory.validPrice;
-      fundHolding.save();
+    let fundHolding = new FundHolding(fund.id + "/" + holdingAddress.toHex());
+    fundHolding.fund = fund.id;
+    fundHolding.asset = holdingAddress.toHex();
+    fundHolding.amount = holdingAmount;
+    fundHolding.assetGav = assetGav;
+    fundHolding.validPrice = fundHoldingsHistory.validPrice;
+    fundHolding.save();
 
-      fund.holdings = fund.holdings.concat([fundHolding.id]);
-      fund.save();
-    }
+    fund.holdings = fund.holdings.concat([fundHolding.id]);
+    fund.save();
   }
 
-  let takerAssetAfterTrade = FundHolding.load(fund.id + "/" + takerAsset);
-  let takerAmountAfterTrade = BigInt.fromI32(0);
-  if (takerAssetAfterTrade) {
-    takerAmountAfterTrade = takerAssetAfterTrade.amount;
+  // taker asset (asset sold) can be zero/non-existant after trade:
+  // update amounts for those cases
+  let takerAssetHoldingAfterTrade = BigInt.fromI32(0);
+  if (
+    !accountingContract.try_assetHoldings(Address.fromString(takerAsset))
+      .reverted
+  ) {
+    takerAssetHoldingAfterTrade = accountingContract.try_assetHoldings(
+      Address.fromString(takerAsset)
+    ).value;
   }
+
+  let takerAssetAfterTrade = new FundHolding(fund.id + "/" + takerAsset);
+  if (takerAssetHoldingAfterTrade.isZero()) {
+    takerAssetAfterTrade.amount = BigInt.fromI32(0);
+    takerAssetAfterTrade.assetGav = BigInt.fromI32(0);
+    takerAssetAfterTrade.fund = fund.id;
+    takerAssetAfterTrade.asset = takerAsset;
+    takerAssetAfterTrade.validPrice = true;
+    takerAssetAfterTrade.save();
+  }
+  let takerAmountAfterTrade = takerAssetHoldingAfterTrade;
 
   let makerAssetAfterTrade = FundHolding.load(fund.id + "/" + makerAsset);
   let makerAmountAfterTrade = BigInt.fromI32(0);
@@ -192,7 +207,10 @@ export function handleExchangeMethodCall(event: ExchangeMethodCall): void {
   trade.amountSold = takerTradeAmount;
   trade.amountBought = makerTradeAmount;
   trade.timestamp = event.block.timestamp;
+  trade.gasUsed = event.transaction.gasUsed;
+  trade.gasPrice = event.transaction.gasPrice;
   trade.save();
+
   // do perform calculations
 
   if (!fundGavValid) {
