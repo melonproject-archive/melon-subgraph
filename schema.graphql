@@ -13,8 +13,11 @@ type State @entity {
   activeFunds: BigInt!
   nonActiveFunds: BigInt!
   timestampFundCount: BigInt!
-  numberOfInvestors: BigInt!
-  timestamptNumberOfInvestors: BigInt!
+  activeInvestors: BigInt!
+  nonActiveInvestors: BigInt!
+  allInvestments: BigInt!
+  activeInvestments: BigInt!
+  nonActiveInvestments: BigInt!
   lastEngineUpdate: BigInt!
   currentEngine: Engine
   totalAmguConsumed: BigInt!
@@ -356,8 +359,9 @@ type Vault @entity {
 type Investor @entity {
   id: ID!
   createdAt: BigInt!
+  active: Boolean!
   valuationHistory: [InvestorValuationHistory!]! @derivedFrom(field: "owner")
-  investments: [Investment!]! @derivedFrom(field: "owner")
+  investments: [Investment!]!
   investmentRequests: [InvestmentRequest!]! @derivedFrom(field: "owner")
   investmentHistory: [InvestmentHistory!]! @derivedFrom(field: "owner")
 }
@@ -446,9 +450,18 @@ type FundCount @entity {
   timestamp: BigInt!
 }
 
+type InvestmentCount @entity {
+  id: ID!
+  all: BigInt!
+  active: BigInt!
+  nonActive: BigInt!
+  timestamp: BigInt!
+}
+
 type InvestorCount @entity {
   id: ID!
-  numberOfInvestors: BigInt!
+  active: BigInt!
+  nonActive: BigInt!
   timestamp: BigInt!
 }
 

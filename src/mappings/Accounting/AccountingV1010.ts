@@ -6,8 +6,6 @@ import { Accounting, Asset } from "../../codegen/schema";
 import { saveEvent } from "../../utils/saveEvent";
 
 export function handleAssetAddition(event: AssetAddition): void {
-  saveEvent("AssetAddition", event);
-
   let accounting = Accounting.load(event.address.toHex());
   if (!accounting) {
     return;
@@ -17,6 +15,7 @@ export function handleAssetAddition(event: AssetAddition): void {
   if (!asset) {
     return;
   }
+  saveEvent("AssetAddition", event);
 
   accounting.ownedAssets = accounting.ownedAssets.concat([
     event.params.asset.toHex()

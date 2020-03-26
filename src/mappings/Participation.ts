@@ -11,14 +11,17 @@ import {
 import {
   Participation,
   Fund,
+  Investor,
   InvestorCount,
+  InvestmentCount,
   InvestmentHistory,
   InvestmentRequest as InvestmentRequestEntity,
   FundCalculationsHistory,
   FundHoldingsHistory,
   InvestmentValuationHistory,
   FundHolding,
-  Registry
+  Registry,
+  Investment
 } from "../codegen/schema";
 import {
   AccountingContract,
@@ -149,7 +152,8 @@ export function handleRequestExecution(event: RequestExecution): void {
   let investment = investmentEntity(
     event.params.requestOwner.toHex(),
     fund.id,
-    event.block.timestamp
+    event.block.timestamp,
+    true
   );
   investment.shares = investment.shares.plus(requestedShares);
   investment.save();
@@ -176,21 +180,8 @@ export function handleRequestExecution(event: RequestExecution): void {
   investmentHistory.amountInDenominationAsset = amountInDenomationAsset;
   investmentHistory.save();
 
-  // this is currently investment-count, not investor-count (misnamed entity)
-  // TODO: have both investment-count and investor-count
-  let state = currentState();
-  let investorCount = new InvestorCount(event.transaction.hash.toHex());
-  investorCount.numberOfInvestors = state.numberOfInvestors.plus(
-    BigInt.fromI32(1)
-  );
-  investorCount.timestamp = event.block.timestamp;
-  investorCount.save();
-
-  state.numberOfInvestors = investorCount.numberOfInvestors;
-  state.timestamptNumberOfInvestors = investorCount.timestamp;
-  state.save();
-
   // calculate fund holdings
+  let state = currentState();
   let currentRegistry = Registry.load(state.registry) as Registry;
   let currentPriceSource = currentRegistry.priceSource;
   if (!currentPriceSource) {
@@ -338,7 +329,12 @@ export function handleRequestExecution(event: RequestExecution): void {
   for (let l: i32 = 0; l < historicalInvestors.length; l++) {
     let investor = historicalInvestors[l].toHex();
 
-    let investment = investmentEntity(investor, fund.id, event.block.timestamp);
+    let investment = investmentEntity(
+      investor,
+      fund.id,
+      event.block.timestamp,
+      false
+    );
 
     let investmentGav = BigInt.fromI32(0);
     let investmentNav = BigInt.fromI32(0);
@@ -427,17 +423,52 @@ export function handleRedemption(event: Redemption): void {
   // this is currently investment-count, not investor-count (misnamed entity)
   // TODO: have both investment-count and investor-count
   let state = currentState();
-  if (!investment.shares.isZero()) {
-    let investorCount = new InvestorCount(event.transaction.hash.toHex());
-    investorCount.numberOfInvestors = state.numberOfInvestors.minus(
+
+  if (investment.shares.isZero()) {
+    let allInvestments = state.allInvestments;
+    let activeInvestments = state.activeInvestments.minus(BigInt.fromI32(1));
+    let nonActiveInvestments = state.nonActiveInvestments.plus(
       BigInt.fromI32(1)
     );
-    investorCount.timestamp = event.block.timestamp;
-    investorCount.save();
 
-    state.numberOfInvestors = investorCount.numberOfInvestors;
-    state.timestamptNumberOfInvestors = investorCount.timestamp;
+    let investmentCount = new InvestmentCount(event.block.timestamp.toString());
+    investmentCount.all = allInvestments;
+    investmentCount.active = activeInvestments;
+    investmentCount.nonActive = nonActiveInvestments;
+    investmentCount.timestamp = event.block.timestamp;
+    investmentCount.save();
+
+    state.activeInvestments = activeInvestments;
+    state.nonActiveInvestments = nonActiveInvestments;
     state.save();
+
+    // check all investments of investors
+    let investor = Investor.load(event.params.redeemer.toHex()) as Investor;
+    let allInvestorShares = BigInt.fromI32(0);
+    for (let k: i32 = 0; k < investor.investments.length; k++) {
+      let investorInvestmentId = (investor.investments as string[])[k];
+      let investorInvestment = Investment.load(
+        investorInvestmentId
+      ) as Investment;
+      allInvestorShares = allInvestorShares.plus(investorInvestment.shares);
+    }
+
+    if (allInvestorShares.isZero()) {
+      let activeInvestors = state.activeInvestors.minus(BigInt.fromI32(1));
+      let nonActiveInvestors = state.nonActiveInvestors.plus(BigInt.fromI32(1));
+      let investorCount = new InvestorCount(event.block.timestamp.toString());
+      investorCount.active = activeInvestors;
+      investorCount.nonActive = nonActiveInvestors;
+      investorCount.timestamp = event.block.timestamp;
+      investorCount.save();
+
+      investor.active = false;
+      investor.save();
+
+      state.activeInvestors = activeInvestors;
+      state.nonActiveInvestors = nonActiveInvestors;
+      state.save();
+    }
   }
 
   // calculate fund holdings
