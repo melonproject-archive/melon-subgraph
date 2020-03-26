@@ -177,6 +177,7 @@ type Exchange @entity {
   adapter: ExchangeAdapter!
   tradings: [Trading!]! @derivedFrom(field: "exchanges")
   calls: [ExchangeMethodCall!]! @derivedFrom(field: "exchange")
+  trades: [Trade!]! @derivedFrom(field: "exchange")
 }
 
 type ExchangeAdapter @entity {
