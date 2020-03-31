@@ -26,6 +26,10 @@ type State @entity {
   registry: Registry!
   registries: [Registry!]!
   networkGav: BigInt!
+  allTrades: BigInt!
+  takeTrades: BigInt!
+  makeTrades: BigInt!
+  cancelTrades: BigInt!
 }
 
 type Registry @entity {
@@ -526,6 +530,14 @@ type Trade @entity {
   timestamp: BigInt!
   gasUsed: BigInt
   gasPrice: BigInt
+}
+
+type TradeCount @entity {
+  id: ID!
+  all: BigInt!
+  make: BigInt!
+  take: BigInt!
+  cancel: BigInt!
 }
 
 type Event @entity {

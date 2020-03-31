@@ -18,6 +18,11 @@ export function currentState(): State {
     state.activeInvestments = BigInt.fromI32(0);
     state.nonActiveInvestments = BigInt.fromI32(0);
 
+    state.allTrades = BigInt.fromI32(0);
+    state.takeTrades = BigInt.fromI32(0);
+    state.makeTrades = BigInt.fromI32(0);
+    state.cancelTrades = BigInt.fromI32(0);
+
     state.lastEngineUpdate = BigInt.fromI32(0);
     state.totalAmguConsumed = BigInt.fromI32(0);
     state.totalMlnBurned = BigInt.fromI32(0);

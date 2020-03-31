@@ -11,7 +11,8 @@ import {
   InvestmentValuationHistory,
   Registry,
   FundHolding,
-  Trade
+  Trade,
+  TradeCount
 } from "../../codegen/schema";
 import {
   AccountingContract,
@@ -214,6 +215,31 @@ export function handleExchangeMethodCall(event: ExchangeMethodCall): void {
   trade.amountBought = makerTradeAmount;
   trade.timestamp = event.block.timestamp;
   trade.save();
+
+  let allTrades = state.allTrades.plus(BigInt.fromI32(1));
+  let takeTrades = state.takeTrades;
+  let makeTrades = state.makeTrades;
+  let cancelTrades = state.cancelTrades;
+
+  let tradeCount = new TradeCount(event.block.timestamp.toString());
+  if (trade.methodName == "takeOrder") {
+    takeTrades = takeTrades.plus(BigInt.fromI32(1));
+  } else if (trade.methodName == "makeOrder") {
+    makeTrades = makeTrades.plus(BigInt.fromI32(1));
+  } else if (trade.methodName == "cancelOrder") {
+    cancelTrades = cancelTrades.plus(BigInt.fromI32(1));
+  }
+  tradeCount.all = allTrades;
+  tradeCount.take = takeTrades;
+  tradeCount.make = makeTrades;
+  tradeCount.cancel = cancelTrades;
+  tradeCount.save();
+
+  state.allTrades = allTrades;
+  state.takeTrades = takeTrades;
+  state.makeTrades = makeTrades;
+  state.cancelTrades = cancelTrades;
+  state.save();
 
   // do perform calculations
   if (!fundGavValid) {
