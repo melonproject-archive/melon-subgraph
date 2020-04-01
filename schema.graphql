@@ -13,8 +13,11 @@ type State @entity {
   activeFunds: BigInt!
   nonActiveFunds: BigInt!
   timestampFundCount: BigInt!
-  numberOfInvestors: BigInt!
-  timestamptNumberOfInvestors: BigInt!
+  activeInvestors: BigInt!
+  nonActiveInvestors: BigInt!
+  allInvestments: BigInt!
+  activeInvestments: BigInt!
+  nonActiveInvestments: BigInt!
   lastEngineUpdate: BigInt!
   currentEngine: Engine
   totalAmguConsumed: BigInt!
@@ -23,6 +26,10 @@ type State @entity {
   registry: Registry!
   registries: [Registry!]!
   networkGav: BigInt!
+  allTrades: BigInt!
+  takeTrades: BigInt!
+  makeTrades: BigInt!
+  cancelTrades: BigInt!
 }
 
 type Registry @entity {
@@ -174,6 +181,7 @@ type Exchange @entity {
   adapter: ExchangeAdapter!
   tradings: [Trading!]! @derivedFrom(field: "exchanges")
   calls: [ExchangeMethodCall!]! @derivedFrom(field: "exchange")
+  trades: [Trade!]! @derivedFrom(field: "exchange")
 }
 
 type ExchangeAdapter @entity {
@@ -356,8 +364,9 @@ type Vault @entity {
 type Investor @entity {
   id: ID!
   createdAt: BigInt!
+  active: Boolean!
   valuationHistory: [InvestorValuationHistory!]! @derivedFrom(field: "owner")
-  investments: [Investment!]! @derivedFrom(field: "owner")
+  investments: [Investment!]!
   investmentRequests: [InvestmentRequest!]! @derivedFrom(field: "owner")
   investmentHistory: [InvestmentHistory!]! @derivedFrom(field: "owner")
 }
@@ -446,9 +455,18 @@ type FundCount @entity {
   timestamp: BigInt!
 }
 
+type InvestmentCount @entity {
+  id: ID!
+  all: BigInt!
+  active: BigInt!
+  nonActive: BigInt!
+  timestamp: BigInt!
+}
+
 type InvestorCount @entity {
   id: ID!
-  numberOfInvestors: BigInt!
+  active: BigInt!
+  nonActive: BigInt!
   timestamp: BigInt!
 }
 
@@ -509,6 +527,17 @@ type Trade @entity {
   assetBought: Asset
   amountSold: BigInt
   amountBought: BigInt
+  timestamp: BigInt!
+  gasUsed: BigInt
+  gasPrice: BigInt
+}
+
+type TradeCount @entity {
+  id: ID!
+  all: BigInt!
+  make: BigInt!
+  take: BigInt!
+  cancel: BigInt!
   timestamp: BigInt!
 }
 

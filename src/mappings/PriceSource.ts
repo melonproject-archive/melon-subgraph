@@ -198,20 +198,16 @@ export function handlePriceUpdate(event: PriceUpdate): void {
           fundHoldingsHistory.validPrice = validPrice;
           fundHoldingsHistory.save();
 
-          if (!holdingAmount.isZero()) {
-            let fundHolding = new FundHolding(
-              hub + "/" + holdingAddress.toHex()
-            );
-            fundHolding.fund = hub;
-            fundHolding.asset = holdingAddress.toHex();
-            fundHolding.amount = holdingAmount;
-            fundHolding.assetGav = assetGav;
-            fundHolding.validPrice = validPrice;
-            fundHolding.save();
+          let fundHolding = new FundHolding(hub + "/" + holdingAddress.toHex());
+          fundHolding.fund = hub;
+          fundHolding.asset = holdingAddress.toHex();
+          fundHolding.amount = holdingAmount;
+          fundHolding.assetGav = assetGav;
+          fundHolding.validPrice = validPrice;
+          fundHolding.save();
 
-            fund.holdings = fund.holdings.concat([fundHolding.id]);
-            fund.save();
-          }
+          fund.holdings = fund.holdings.concat([fundHolding.id]);
+          fund.save();
 
           fundGavFromAssets = fundGavFromAssets.plus(assetGav);
 

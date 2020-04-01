@@ -1,4 +1,4 @@
-import { BigInt } from "@graphprotocol/graph-ts";
+import { BigInt, dataSource } from "@graphprotocol/graph-ts";
 import { FundSlug, Version } from "../codegen/schema";
 import { nameToSlug } from "./nameToSlug";
 
@@ -9,6 +9,14 @@ export function generateSlug(
   version: string
 ): void {
   let slug = nameToSlug(name);
+
+  let versionEntity = Version.load(version) as Version;
+  if (
+    dataSource.network() == "mainnet" &&
+    versionEntity.timestamp < BigInt.fromI32(1581897111)
+  ) {
+    slug = slug + "-v-" + nameToSlug(versionEntity.name as string);
+  }
 
   let fundslug = FundSlug.load(slug);
 
@@ -39,10 +47,9 @@ export function generateSlug(
   } else {
     // existing slug, same manager
     // => add version suffix to slug
-    let versionEntity = Version.load(fundslug.version) as Version;
 
     let oldFundSlug = new FundSlug(
-      fundslug.id + "-version-" + nameToSlug(versionEntity.name as string)
+      fundslug.id + "-v-" + nameToSlug(versionEntity.name as string)
     );
     oldFundSlug.fund = fundslug.fund;
     oldFundSlug.manager = fundslug.manager;
