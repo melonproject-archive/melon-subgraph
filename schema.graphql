@@ -538,6 +538,7 @@ type TradeCount @entity {
   make: BigInt!
   take: BigInt!
   cancel: BigInt!
+  timestamp: BigInt!
 }
 
 type Event @entity {

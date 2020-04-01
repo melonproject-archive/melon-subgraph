@@ -235,6 +235,7 @@ export function handleExchangeMethodCall(event: ExchangeMethodCall): void {
   tradeCount.take = takeTrades;
   tradeCount.make = makeTrades;
   tradeCount.cancel = cancelTrades;
+  tradeCount.timestamp = event.block.timestamp;
   tradeCount.save();
 
   state.allTrades = allTrades;
