@@ -1,13 +1,13 @@
 import {
   FeeRegistration,
-  FeeReward
+  FeeReward,
 } from "../codegen/templates/FeeManagerDataSource/FeeManagerContract";
 import {
   FeeManager,
   ManagementFee,
   PerformanceFee,
   FeeRewardHistory,
-  InvestmentHistory
+  InvestmentHistory,
 } from "../codegen/schema";
 import { investmentEntity } from "../entities/investmentEntity";
 import { FeeManagerContract } from "../codegen/templates/FeeManagerDataSource/FeeManagerContract";
@@ -17,7 +17,7 @@ import { ManagementFeeContract } from "../codegen/templates/FeeManagerDataSource
 import { PerformanceFeeContract } from "../codegen/templates/FeeManagerDataSource/PerformanceFeeContract";
 import {
   AccountingContract,
-  AccountingContract__performCalculationsResult
+  AccountingContract__performCalculationsResult,
 } from "../codegen/templates/FeeManagerDataSource/AccountingContract";
 import { saveEvent } from "../utils/saveEvent";
 import { emptyCalcsObject } from "../utils/emptyCalcsObject";
@@ -28,12 +28,15 @@ export function handleFeeRegistration(event: FeeRegistration): void {
   // this event only passes very limited data, so
   // we have to get everything through contract calls...
   let feeManager = FeeManager.load(event.address.toHex());
+  let feeManagerContract = FeeManagerContract.bind(event.address);
+
   if (!feeManager) {
     feeManager = new FeeManager(event.address.toHex());
+    feeManager.fund = feeManagerContract.hub().toHex();
+    feeManager.totalFeeReward = BigInt.fromI32(0);
     feeManager.feesRegistered = BigInt.fromI32(0);
     feeManager.save();
   }
-  let feeManagerContract = FeeManagerContract.bind(event.address);
 
   // fee[0] is the management fee
   if (
