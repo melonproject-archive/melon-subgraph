@@ -5,7 +5,7 @@ import {
   FundCount,
   FundManager,
   FundCalculationsHistory,
-  Version
+  Version,
 } from "../../codegen/schema";
 import { hexToAscii } from "../../utils/hexToAscii";
 import { HubContract } from "../../codegen/templates/VersionDataSource/HubContract";
@@ -14,7 +14,7 @@ import { currentState } from "../../utils/currentState";
 import { saveContract } from "../../utils/saveContract";
 import {
   AccountingContract,
-  AccountingContract__performCalculationsResult
+  AccountingContract__performCalculationsResult,
 } from "../../codegen/templates/VersionDataSource/AccountingContract";
 import { SharesContract } from "../../codegen/templates/VersionDataSource/SharesContract";
 import { saveEvent } from "../../utils/saveEvent";
@@ -35,7 +35,7 @@ export function handleNewFund(event: NewFund): void {
   HubDataSource.create(event.params.hub);
 
   let hub = event.params.hub.toHex();
-  let addresses = event.params.routes.map<string>(value => value.toHex());
+  let addresses = event.params.routes.map<string>((value) => value.toHex());
   let contract = HubContract.bind(event.params.hub);
 
   let manager = FundManager.load(event.params.manager.toHex());
@@ -62,7 +62,9 @@ export function handleNewFund(event: NewFund): void {
   fund.share = addresses[4];
   fund.trading = addresses[5];
   fund.vault = addresses[6];
-  fund.priceSource = contract.priceSource().toHex();
+  fund.priceSource = !contract.try_priceSource().reverted
+    ? contract.try_priceSource().value.toHex()
+    : "";
   fund.registry = addresses[7];
   fund.version = addresses[8];
   fund.engine = addresses[9];

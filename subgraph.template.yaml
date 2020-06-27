@@ -237,7 +237,7 @@ templates:
         - InvestorValuationHistory
       abis:
         - name: PriceSourceContract
-          file: ./src/abis/KyberPriceFeed.abi
+          file: ./src/abis/KyberPriceFeed.abi.json
         - name: RegistryContract
           file: ./src/abis/Registry.abi
         - name: VersionContract
@@ -259,7 +259,8 @@ templates:
       eventHandlers:
         - event: PriceUpdate(address[],uint256[])
           handler: handlePriceUpdate
-
+        - event: PricesUpdated(address[],uint256[])
+          handler: handlePriceUpdate
   #
   # Factory contracts for fund spokes
   #
@@ -589,7 +590,7 @@ templates:
         - name: HubContract
           file: ./src/abis/Hub.abi
         - name: PriceSourceContract
-          file: ./src/abis/KyberPriceFeed.abi
+          file: ./src/abis/KyberPriceFeed.abi.json
         - name: RegistryContract
           file: ./src/abis/Registry.abi
         - name: FeeManagerContract
@@ -688,7 +689,7 @@ templates:
         - name: RegistryContract
           file: ./src/abis/Registry.abi
         - name: PriceSourceContract
-          file: ./src/abis/KyberPriceFeed.abi
+          file: ./src/abis/KyberPriceFeed.abi.json
         - name: SharesContract
           file: ./src/abis/Shares.abi
         - name: FeeManagerContract
@@ -724,7 +725,7 @@ templates:
         - name: RegistryContract
           file: ./src/abis/Registry.abi
         - name: PriceSourceContract
-          file: ./src/abis/KyberPriceFeed.abi
+          file: ./src/abis/KyberPriceFeed.abi.json
         - name: SharesContract
           file: ./src/abis/Shares.abi
         - name: FeeManagerContract
@@ -760,7 +761,7 @@ templates:
         - name: RegistryContract
           file: ./src/abis/Registry.abi
         - name: PriceSourceContract
-          file: ./src/abis/KyberPriceFeed.abi
+          file: ./src/abis/KyberPriceFeed.abi.json
         - name: SharesContract
           file: ./src/abis/Shares.abi
         - name: FeeManagerContract
